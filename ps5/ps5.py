@@ -149,15 +149,26 @@ class AfterTrigger(TimeTrigger):
 
 # Problem 7
 class NotTrigger(Trigger):
-    
-    def evaluate(self, story:
-        return not trigger(story)
+    def __init__(self, T):
+        self.T = T
+    def evaluate(self, story):
+        return not self.T.evaluate(story)
 
 # Problem 8
-# TODO: AndTrigger
+class AndTrigger(Trigger):
+    def __init__(self, T1, T2):
+        self.T1 = T1
+        self.T2 = T2
+    def evaluate(self, story):
+        return self.T1.evaluate(story) and self.T2.evaluate(story)
 
 # Problem 9
-# TODO: OrTrigger
+class OrTrigger(Trigger):
+    def __init__(self, T1, T2):
+        self.T1 = T1
+        self.T2 = T2
+    def evaluate(self, story):
+        return self.T1.evaluate(story) or self.T2.evaluate(story)
 
 
 #======================
@@ -171,10 +182,11 @@ def filter_stories(stories, triggerlist):
 
     Returns: a list of only the stories for which a trigger in triggerlist fires.
     """
-    # TODO: Problem 10
-    # This is a placeholder
-    # (we're just returning all the stories, with no filtering)
-    return stories
+    filteredlist = []
+    for story in stories:
+        if any([trigger.evaluate(story) for trigger in triggerlist]):
+            filteredlist.append(story)
+    return filteredlist
 
 
 
@@ -212,15 +224,15 @@ def main_thread(master):
     # A sample trigger list - you might need to change the phrases to correspond
     # to what is currently in the news
     try:
-        t1 = TitleTrigger("election")
+        t1 = TitleTrigger("Trump")
         t2 = DescriptionTrigger("Trump")
-        t3 = DescriptionTrigger("Clinton")
+        t3 = DescriptionTrigger("coronavirus")
         t4 = AndTrigger(t2, t3)
         triggerlist = [t1, t4]
 
         # Problem 11
         # TODO: After implementing read_trigger_config, uncomment this line 
-        # triggerlist = read_trigger_config('triggers.txt')
+        triggerlist = read_trigger_config('ps5/triggers.txt')
         
         # HELPER CODE - you don't need to understand this!
         # Draws the popup window that displays the filtered stories
