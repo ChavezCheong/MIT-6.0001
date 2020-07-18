@@ -70,15 +70,16 @@ class SubMessage(object):
             self.message_text (string, determined by input text)
             self.valid_words (list, determined using helper function load_words)
         '''
-        pass #delete this line and replace with your code here
-    
+        self.message_text = text
+        self.valid_words = load_words(WORDLIST_FILENAME)
+
     def get_message_text(self):
         '''
         Used to safely access self.message_text outside of the class
         
         Returns: self.message_text
         '''
-        pass #delete this line and replace with your code here
+        return self.message_text
 
     def get_valid_words(self):
         '''
@@ -87,8 +88,8 @@ class SubMessage(object):
         
         Returns: a COPY of self.valid_words
         '''
-        pass #delete this line and replace with your code here
-                
+        return self.valid_words
+
     def build_transpose_dict(self, vowels_permutation):
         '''
         vowels_permutation (string): a string containing a permutation of vowels (a, e, i, o, u)
@@ -108,9 +109,19 @@ class SubMessage(object):
         Returns: a dictionary mapping a letter (string) to 
                  another letter (string). 
         '''
+        shift_dict = {}
+        vowels_permutation_list = list(vowels_permutation)
+        for consonant_lower in CONSONANTS_LOWER:
+            shift_dict[consonant_lower] = consonant_lower
+        for consonant_upper in CONSONANTS_UPPER:
+            shift_dict[consonant_upper] = consonant_upper
+        for i in range(5):
+            shift_dict[VOWELS_LOWER[i]] = vowels_permutation_list[i]
+            shift_dict[VOWELS_UPPER[i]] = vowels_permutation_list[i].upper()
         
-        pass #delete this line and replace with your code here
-    
+        return shift_dict
+
+
     def apply_transpose(self, transpose_dict):
         '''
         transpose_dict (dict): a transpose dictionary
@@ -118,8 +129,14 @@ class SubMessage(object):
         Returns: an encrypted version of the message text, based 
         on the dictionary
         '''
-        
-        pass #delete this line and replace with your code here
+        finalstring = ""
+        message_text = self.message_text
+        for char in message_text:
+            if char.isalpha():
+                finalstring += transpose_dict[char]
+            else:
+                finalstring += char
+        return finalstring
         
 class EncryptedSubMessage(SubMessage):
     def __init__(self, text):
@@ -132,7 +149,7 @@ class EncryptedSubMessage(SubMessage):
             self.message_text (string, determined by input text)
             self.valid_words (list, determined using helper function load_words)
         '''
-        pass #delete this line and replace with your code here
+        SubMessage.__init__(self, text)
 
     def decrypt_message(self):
         '''
@@ -152,9 +169,19 @@ class EncryptedSubMessage(SubMessage):
         
         Hint: use your function from Part 4A
         '''
-        pass #delete this line and replace with your code here
-    
-
+        permutation_list = get_permutations(VOWELS_LOWER)
+        valid_words = self.get_valid_words()
+        running_count = 0
+        for permutation in permutation_list:
+            transpose_dict = self.build_transpose_dict(permutation)
+            decrypted_message_list = self.apply_transpose(transpose_dict).split()
+            valid_word_count = sum([True if is_word(valid_words, word) else False for word in decrypted_message_list])
+            if valid_word_count > running_count:
+                running_count = valid_word_count
+                decrypted_message = self.apply_transpose(transpose_dict)
+        if running_count == 0:
+            return self.message_text
+        return decrypted_message
 if __name__ == '__main__':
 
     # Example test case
@@ -167,4 +194,3 @@ if __name__ == '__main__':
     enc_message = EncryptedSubMessage(message.apply_transpose(enc_dict))
     print("Decrypted message:", enc_message.decrypt_message())
      
-    #TODO: WRITE YOUR TEST CASES HERE
