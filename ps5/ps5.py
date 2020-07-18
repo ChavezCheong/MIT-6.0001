@@ -211,11 +211,33 @@ def read_trigger_config(filename):
             lines.append(line)
 
     # TODO: Problem 11
-    # line is the list of lines that you need to parse and for which you need
-    # to build triggers
+    triggerlist = []
+    triggerdict = {}
 
-    print(lines) # for now, print it so you see what it contains!
+    #Command dictionary
+    command_dict = {
+        "TITLE" : TitleTrigger,
+        "DESCRIPTION": DescriptionTrigger,
+        "AFTER": AfterTrigger,
+        "BEFORE": BeforeTrigger,
+        "NOT": NotTrigger,
+        "AND": AndTrigger,
+        "OR": OrTrigger
+    }
 
+    for line in lines:
+        commandlist = line.split(",")
+        if commandlist[0] == "ADD":
+            triggerlist.append(triggerdict[commandlist[1]])
+            triggerlist.append(triggerdict[commandlist[2]])
+        elif commandlist[1] == "AND" or commandlist[1] == "OR":
+            trigger = command_dict[commandlist[1]]
+            triggerdict[commandlist[0]] = trigger(commandlist[2], commandlist[3])
+        else:
+            trigger = command_dict[commandlist[1]]
+            triggerdict[commandlist[0]] = trigger(commandlist[2])
+
+        return triggerlist
 
 
 SLEEPTIME = 120 #seconds -- how often we poll
@@ -230,10 +252,11 @@ def main_thread(master):
         t4 = AndTrigger(t2, t3)
         triggerlist = [t1, t4]
 
-        # Problem 11
-        # TODO: After implementing read_trigger_config, uncomment this line 
+        # Problem 11 
         triggerlist = read_trigger_config('ps5/triggers.txt')
         
+
+
         # HELPER CODE - you don't need to understand this!
         # Draws the popup window that displays the filtered stories
         # Retrieves and filters the stories from the RSS feeds
